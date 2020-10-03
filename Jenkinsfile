@@ -1,6 +1,6 @@
 pipeline {
 
-    agent { docker { image 'python:3.5.1' } }
+    agent { any }
 
     stages {
 
@@ -8,12 +8,16 @@ pipeline {
 
             steps {
 
-                sh 'python --version'
-
+		sh docker build --tag=nginxapp nginxapp	
             }
 
         }
+	
+	stage('deploy') {
+		steps {
+			sh docker run run --detach --publish=5001:80 --name=nginxapp nginxapp
+		}
 
-    }
+    	}
 
 }
