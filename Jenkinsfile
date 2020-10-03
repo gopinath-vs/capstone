@@ -8,14 +8,14 @@ pipeline {
 
             steps {
 
-		sh docker build --tag=nginxapp nginxapp	
+		sh "docker build --tag=nginxapp nginxapp"	
             }
 
         }
 	
 	stage('deploy') {
 		steps {
-			sh docker run run --detach --publish=5001:80 --name=nginxapp nginxapp
+			sh "docker run --detach --publish=5001:80 --name=nginxapp nginxapp"
 		}
 
     	}
