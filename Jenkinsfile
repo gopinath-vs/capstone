@@ -8,7 +8,7 @@ agent any
     stages {
 	stage('Set Env') {
 		steps {
-			sh 'apt install make'
+			sh 'sudo apt install make'
 			sh 'make install'	
 		}
 	}
