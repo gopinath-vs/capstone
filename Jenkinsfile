@@ -6,12 +6,6 @@ environment {
 }
 agent any
     stages {
-	stage('Cloning Git') {
-	      steps {
-        	git 'https://git@github.com:gopinath-vs/capstone.git'
-	      }
-	}
-
 /*        stage('Lint HTML') {
             steps {
                 sh 'make test'
