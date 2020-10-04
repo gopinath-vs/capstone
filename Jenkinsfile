@@ -1,28 +1,45 @@
 pipeline {
-
-    agent  {
-		docker { 
-				image 'ubuntu:18.04' 
-			} 
+environment {
+	registry = "gopinathvs/mydockerrep"
+	registryCredential = 'dockerhub'
+	dockerhub=''
+}
+agent any
+    stages {
+	stage('Cloning Git') {
+	      steps {
+        	git 'https://git@github.com:gopinath-vs/capstone.git'
+	      }
 	}
 
-    stages {
-
-        stage('build') {
-
+/*        stage('Lint HTML') {
             steps {
-
-		sh "docker build --tag=nginxapp nginxapp"	
+                sh 'make test'
             }
+        }*/
 
-        }
-	
-	stage('deploy') {
-		steps {
-			sh "docker run --detach --publish=5001:80 --name=nginxapp nginxapp"
-		}
-
+    	stage('Building image') {
+		steps{
+        		script {
+          			dockerImage = docker.build registry + ":$BUILD_NUMBER"
+        		}
+      		}
     	}
 
-   }	
+	stage('Deploy Image') {
+      		steps{
+        		script {
+          			docker.withRegistry( '', registryCredential ) {
+            				dockerImage.push()
+          			}
+        		}		
+      		}
+    	}
+
+	stage('Remove Unused docker image') {
+      		steps{
+        		sh "docker rmi $registry:$BUILD_NUMBER"
+      		}
+    	}
+     }
 }

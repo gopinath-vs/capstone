@@ -1,11 +1,12 @@
-FROM ubuntu:18.04
+FROM nginx:alpine
 
-RUN apt-get update
-RUN apt-get install -y nginx
+WORKDIR	/app
 
-ADD nginx.conf /etc/nginx/nginx.conf
-ADD ./www /www
+
+COPY ./index.html /usr/share/nginx/html/index.html
 
 EXPOSE 80
-CMD ["nginx"]
+
+
+
 
