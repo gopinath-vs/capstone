@@ -7,28 +7,12 @@ environment {
 }
 agent any
     stages {
-        stage('Lint HTML') {
-            steps {
-                sh 'tidy -q -e *.html'
-            }
-        }
+        stage('Lint HTML') { steps { sh 'tidy -q -e *.html' } }
 
-    	stage('Building image') {
-		steps{
-        		script {
-          			dockerImage = docker.build registry + ":" + tagName
-        		}
-      		}
-    	}
+    	stage('Building image') { steps{script {dockerImage = docker.build registry + ":" + tagName}}}
 
 	stage('Deploy Image') {
-      		steps{
-        		script {
-          			docker.withRegistry( '', registryCredential ) {
-            				dockerImage.push()
-          			}
-        		}		
-      		}
+      		steps{	script {docker.withRegistry( '', registryCredential ) {	dockerImage.push()}}}
     	}
 
 /*	stage('Remove Unused docker image') {
@@ -42,7 +26,6 @@ agent any
             steps {
 
                 withAWS(region: 'us-east-2', credentials: 'gopinathvs') {
-//		  withCredentials([[$class: 'AmazonWebServiceCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'gopinathvs', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                     sh """
 			aws eks --region us-east-2 update-kubeconfig --name capstone-cluster
                     	kubectl get svc
@@ -59,5 +42,4 @@ agent any
             }
         }
     }
-}
 }
