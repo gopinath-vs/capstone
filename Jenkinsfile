@@ -42,18 +42,22 @@ agent any
             steps {
 
                 withAWS(region: 'us-east-2', credentials: 'gopinathvs') {
-                    sh ''' aws eks --region us-east-2 update-kubeconfig --name capstone-cluster'''
-                    sh "kubectl get svc"
-                    sh "kubectl config use-context arn:aws:eks:us-east-2:527858259505:cluster/capstone-cluster"
-		    sh "kubectl apply -f blue-controller.json"
-		    sh "kubectl apply -f blue-green-service.json"
-                    sh "kubectl get pod"
-                    sh "kubectl get nodes"
-                    sh "kubectl get deployment"
-                    sh "kubectl get pod -o wide"
-                    sh "kubectl get service/capstone-lb-service"
+//		  withCredentials([[$class: 'AmazonWebServiceCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'gopinathvs', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                    sh """
+			aws eks --region us-east-2 update-kubeconfig --name capstone-cluster
+                    	kubectl get svc
+                    	kubectl config use-context arn:aws:eks:us-east-2:527858259505:cluster/capstone-cluster
+		    	kubectl apply -f blue-controller.json
+		    	kubectl apply -f blue-green-service.json
+                    	kubectl get pod
+                    	kubectl get nodes
+                    	kubectl get deployment
+                    	kubectl get pod -o wide
+                    	kubectl get service/capstone-lb-service
+		    """
                 }
             }
         }
     }
+}
 }
