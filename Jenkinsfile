@@ -16,7 +16,7 @@ agent any
 	}
         stage('Lint HTML') {
             steps {
-                sh 'make test'
+                sh 'make lint'
             }
         }
 
