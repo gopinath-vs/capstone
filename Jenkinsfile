@@ -3,6 +3,7 @@ environment {
 	registry = "gopinathvs/mydockerrep"
 	registryCredential = 'dockerhub'
 	dockerhub=''
+	tagName = "capstoneblue"
 }
 agent any
     stages {
@@ -15,7 +16,7 @@ agent any
     	stage('Building image') {
 		steps{
         		script {
-          			dockerImage = docker.build registry + ":capstoneblue"
+          			dockerImage = docker.build registry + ":" + tagName
         		}
       		}
     	}
@@ -32,7 +33,7 @@ agent any
 
 	stage('Remove Unused docker image') {
       		steps{
-        		sh "docker rmi $registry:capstoneblue"
+        		sh "docker rmi $registry:$tagName"
       		}
     	}
      }
