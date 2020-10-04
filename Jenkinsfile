@@ -9,9 +9,7 @@ agent any
 	stage('Set Env') {
 		steps {
 			sh 'apt install make'
-			sh 'apt install tidy'
-			sh 'wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\ 
-				chmod +x /bin/hadolint'
+			sh 'make install'	
 		}
 	}
         stage('Lint HTML') {
