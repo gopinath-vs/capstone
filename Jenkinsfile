@@ -31,10 +31,10 @@ agent any
       		}
     	}
 
-	stage('Remove Unused docker image') {
+/*	stage('Remove Unused docker image') {
       		steps{
         		sh "docker rmi $registry:$tagName"
       		}
-    	}
+    	}*/
      }
 }
