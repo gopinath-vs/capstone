@@ -6,11 +6,11 @@
 
    "metadata":{
 
-      "name":"bluegreenlb",
+      "name":"capston-lb-service",
 
       "labels":{
 
-         "app":"bluegreenlb"
+         "app":"capstone-lb-service"
 
       }
 
