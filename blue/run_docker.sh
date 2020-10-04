@@ -10,7 +10,7 @@
 
 # Build image and add a descriptive tag
 
-docker build --tag=capstonedocker .
+docker pull gopinathvs/mydockerrep:capstoneblue
 
 
 
@@ -26,4 +26,4 @@ docker image -ls
 
 # Run flask app
 
-docker run -p 8000:80 capstonedocker
+docker run -p 8200:80 capstoneblue

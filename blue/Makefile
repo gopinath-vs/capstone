@@ -8,7 +8,7 @@ install:
 	sudo wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
 	sudo chmod +x /bin/hadolint
 	sudo apt install tidy
-test:
+lint:
 
 
 	# See local hadolint install instructions:   https://github.com/hadolint/hadolint
@@ -20,4 +20,4 @@ test:
 	tidy -q -e *.html
 
 
-all: install lint test
+all: install lint
