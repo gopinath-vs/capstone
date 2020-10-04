@@ -36,7 +36,7 @@ agent any
                     	kubectl get nodes
                     	kubectl get deployment
                     	kubectl get pod -o wide
-                    	kubectl get service/capstone-lb-service
+                    	kubectl get service/capston-lb-service
 		    """
                 }
             }
