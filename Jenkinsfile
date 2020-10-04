@@ -6,15 +6,9 @@ environment {
 }
 agent any
     stages {
-	stage('Set Env') {
-		steps {
-			sh 'sudo apt install make'
-			sh 'make install'	
-		}
-	}
         stage('Lint HTML') {
             steps {
-                sh 'make lint'
+                sh 'tidy -q -e *.html'
             }
         }
 
