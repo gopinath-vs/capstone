@@ -30,7 +30,8 @@ agent any
 			aws eks --region us-east-2 update-kubeconfig --name capstone-cluster
                     	kubectl get svc
                     	kubectl config use-context arn:aws:eks:us-east-2:527858259505:cluster/capstone-cluster
-		    	kubectl apply -f blue-controller.json
+		    	cat blue-controller.json
+			kubectl apply -f blue-controller.json
 		    	kubectl apply -f blue-green-service.json
                     	kubectl get pod
                     	kubectl get nodes
