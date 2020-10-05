@@ -48,7 +48,7 @@
 
                   "name":"blue",
 
-                  "image":"gopinathvs/mydockerrep:capstone",
+                  "image":"gopinathvs/mydockerrep:capstoneblue",
 
                   "ports":[
 
