@@ -1,0 +1,43 @@
+{
+
+   "kind":"Service",
+
+   "apiVersion":"v1",
+
+   "metadata":{
+
+      "name":"capston-lb-service",
+
+      "labels":{
+
+         "app":"capstone-lb-service"
+
+      }
+
+   },
+
+   "spec":{
+
+      "ports": [
+
+         {
+
+           "port":8000,
+
+           "targetPort":80
+
+         }
+
+      ],
+
+      "selector":{
+
+         "app":"green"
+
+      },
+
+      "type": "LoadBalancer"
+
+   }
+
+}

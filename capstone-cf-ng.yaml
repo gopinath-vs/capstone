@@ -1,0 +1,189 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  EKS nodes (AMI family: AmazonLinux2, SSH access: false, private networking:
+  false) [created and managed by eksctl]
+Mappings:
+  ServicePrincipalPartitionMap:
+    aws:
+      EC2: ec2.amazonaws.com
+      EKS: eks.amazonaws.com
+      EKSFargatePods: eks-fargate-pods.amazonaws.com
+    aws-cn:
+      EC2: ec2.amazonaws.com.cn
+      EKS: eks.amazonaws.com
+      EKSFargatePods: eks-fargate-pods.amazonaws.com
+    aws-us-gov:
+      EC2: ec2.amazonaws.com
+      EKS: eks.amazonaws.com
+      EKSFargatePods: eks-fargate-pods.amazonaws.com
+Resources:
+  EgressInterCluster:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      Description: >-
+        Allow control plane to communicate with worker nodes in group
+        my-linux-nodes (kubelet and workload TCP ports)
+      DestinationSecurityGroupId: !Ref SG
+      FromPort: 1025
+      GroupId: !ImportValue 'eksctl-capstone-cluster-cluster::SecurityGroup'
+      IpProtocol: tcp
+      ToPort: 65535
+  EgressInterClusterAPI:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      Description: >-
+        Allow control plane to communicate with worker nodes in group
+        my-linux-nodes (workloads using HTTPS port, commonly used with extension
+        API servers)
+      DestinationSecurityGroupId: !Ref SG
+      FromPort: 443
+      GroupId: !ImportValue 'eksctl-capstone-cluster-cluster::SecurityGroup'
+      IpProtocol: tcp
+      ToPort: 443
+  IngressInterCluster:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      Description: >-
+        Allow worker nodes in group my-linux-nodes to communicate with control
+        plane (kubelet and workload TCP ports)
+      FromPort: 1025
+      GroupId: !Ref SG
+      IpProtocol: tcp
+      SourceSecurityGroupId: !ImportValue 'eksctl-capstone-cluster-cluster::SecurityGroup'
+      ToPort: 65535
+  IngressInterClusterAPI:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      Description: >-
+        Allow worker nodes in group my-linux-nodes to communicate with control
+        plane (workloads using HTTPS port, commonly used with extension API
+        servers)
+      FromPort: 443
+      GroupId: !Ref SG
+      IpProtocol: tcp
+      SourceSecurityGroupId: !ImportValue 'eksctl-capstone-cluster-cluster::SecurityGroup'
+      ToPort: 443
+  IngressInterClusterCP:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      Description: >-
+        Allow control plane to receive API requests from worker nodes in group
+        my-linux-nodes
+      FromPort: 443
+      GroupId: !ImportValue 'eksctl-capstone-cluster-cluster::SecurityGroup'
+      IpProtocol: tcp
+      SourceSecurityGroupId: !Ref SG
+      ToPort: 443
+  NodeGroup:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateName: !Sub '${AWS::StackName}'
+        Version: !GetAtt 
+          - NodeGroupLaunchTemplate
+          - LatestVersionNumber
+      MaxSize: '2'
+      MinSize: '2'
+      Tags:
+        - Key: Name
+          PropagateAtLaunch: 'true'
+          Value: capstone-cluster-my-linux-nodes-Node
+        - Key: kubernetes.io/cluster/capstone-cluster
+          PropagateAtLaunch: 'true'
+          Value: owned
+      VPCZoneIdentifier: !Split 
+        - ','
+        - !ImportValue 'eksctl-capstone-cluster-cluster::SubnetsPublic'
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MaxBatchSize: '1'
+        MinInstancesInService: '0'
+  NodeGroupLaunchTemplate:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+      LaunchTemplateData:
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              Encrypted: false
+              VolumeSize: 80
+              VolumeType: gp2
+        IamInstanceProfile:
+          Arn: !GetAtt 
+            - NodeInstanceProfile
+            - Arn
+        ImageId: ami-0633c618b3b920986
+        InstanceType: t2.micro
+        MetadataOptions:
+          HttpPutResponseHopLimit: 2
+          HttpTokens: optional
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            Groups:
+              - !ImportValue 'eksctl-capstone-cluster-cluster::SharedNodeSecurityGroup'
+              - !Ref SG
+        UserData: >-
+          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
+      LaunchTemplateName: !Sub '${AWS::StackName}'
+  NodeInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref NodeInstanceRole
+  NodeInstanceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - !FindInMap 
+                  - ServicePrincipalPartitionMap
+                  - !Ref 'AWS::Partition'
+                  - EC2
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - !Sub >-
+          arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy'
+      Path: /
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}/NodeInstanceRole'
+  SG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Communication between the control plane and worker nodes in group
+        my-linux-nodes
+      Tags:
+        - Key: kubernetes.io/cluster/capstone-cluster
+          Value: owned
+        - Key: Name
+          Value: !Sub '${AWS::StackName}/SG'
+      VpcId: !ImportValue 'eksctl-capstone-cluster-cluster::VPC'
+Outputs:
+  FeatureLocalSecurityGroup:
+    Value: true
+  FeaturePrivateNetworking:
+    Value: false
+  FeatureSharedSecurityGroup:
+    Value: true
+  InstanceProfileARN:
+    Export:
+      Name: !Sub '${AWS::StackName}::InstanceProfileARN'
+    Value: !GetAtt 
+      - NodeInstanceProfile
+      - Arn
+  InstanceRoleARN:
+    Export:
+      Name: !Sub '${AWS::StackName}::InstanceRoleARN'
+    Value: !GetAtt 
+      - NodeInstanceRole
+      - Arn
+
